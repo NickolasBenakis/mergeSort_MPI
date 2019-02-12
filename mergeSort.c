@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     MPI_Get_processor_name (myHostName, &length); 
 
     // check for odd processes
-    powerOfTwo(id, numProcs);
+    powerOfTwo(id, numProcs);    
 
     // get size of global array
     getInput(argc, argv, id, numProcs, &globalArraySize);
