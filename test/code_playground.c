@@ -25,18 +25,34 @@
 
 // }
 
-    // with static array
+    //Program with static array
+
+int cmpfunc(const void *, const void *);
+
 int main(int argc, const char * argv[]){
     int n = 16; // dexomai arithmo stoixeiwn apo to command
     int original_array[n-1];
+
+    printf("\nInput Array\n");
     for (int i = 0; i < n; i++) {
-        original_array[i] = rand() % (2 * n); // pernaw ta stoixeia tou array mesa
-        //printf("original_array[%d] = %d\n",i,original_array[i]);
-        printf(" This is the Address: %p, this the value : %d\n",&original_array,original_array[i]);
+        original_array[i] = rand() % (2 * n);
+        //printf(" This is the Address: %p, this the value : %d\n",&original_array,original_array[i]);
+        printf("%d, ",original_array[i]);
     }
+    printf("\n");
+
+    qsort(original_array, n, sizeof(int), cmpfunc);
+
+    printf("\nAfter sorting the list is: \n");
+    for (int i = 0 ; i< n; i++){
+        printf("%d, ", original_array[i]);
+    }
+    printf("\n");
 
     return(0);
 
 }
-
-
+// callback function 
+int cmpfunc (const void * a, const void * b) {
+    return ( *(int*)a - *(int*)b );
+}
