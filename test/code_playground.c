@@ -75,12 +75,16 @@ int main(int argc, const char *argv[])
     // Step 2.2: Exchange boundary values between paired groups
     if(rank == 0){
         min0 = sub_array[0];
-        max0 = sub_array[n-1];
+        max0 = sub_array[num-1];
+        printf("\nMin for rank %d, is %d ",rank,sub_array[0]);
+        printf("\nMax for rank %d, is %d ",rank,sub_array[num-1]);
 
     }
     else if(rank == 1){
         min1 = sub_array[0];
-        max1 = sub_array[n-1];
+        max1 = sub_array[num-1];
+        printf("\nMin for rank %d, is %d ",rank,sub_array[0]);
+        printf("\nMax for rank %d, is %d \n",rank,sub_array[num-1]);
     }
 
 
