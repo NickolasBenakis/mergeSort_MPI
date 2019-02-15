@@ -43,6 +43,7 @@ int main(int argc, const char *argv[])
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Status status;
 
         // Step 1 : I set a list with n items
     if (rank == 0){
@@ -57,8 +58,8 @@ int main(int argc, const char *argv[])
 
 
     num = n / size;
-    int sub_array[num], first, last, middle, splitter, median, search, min0,max0,min1,max1;
-
+    int sub_array[num], first, last, middle, splitter, median,median_first, search, min0,max0,min1,max1,min,max, msgtag;
+    
     MPI_Scatter(original_array, num, MPI_INT,
                 sub_array, num, MPI_INT,
                 0, MPI_COMM_WORLD);
@@ -73,60 +74,70 @@ int main(int argc, const char *argv[])
     printf("\n");
 
     // Step 2.2: Exchange boundary values between paired groups
-    if(rank == 0){
-        min0 = sub_array[0];
-        max0 = sub_array[num-1];
-        printf("\nMin for rank %d, is %d ",rank,sub_array[0]);
-        printf("\nMax for rank %d, is %d ",rank,sub_array[num-1]);
+    // if(rank == 0){
+    //     min0 = sub_array[0];
+    //     max0 = sub_array[num-1];
+    //     printf("\nMin for rank %d, is %d ",rank,sub_array[0]);
+    //     printf("\nMax for rank %d, is %d ",rank,sub_array[num-1]);
 
-    }
-    else if(rank == 1){
-        min1 = sub_array[0];
-        max1 = sub_array[num-1];
-        printf("\nMin for rank %d, is %d ",rank,sub_array[0]);
-        printf("\nMax for rank %d, is %d \n",rank,sub_array[num-1]);
-    }
+    // }
+    // else if(rank == 1){
+    //     min1 = sub_array[0];
+    //     max1 = sub_array[num-1];
+    //     printf("\nMin for rank %d, is %d ",rank,sub_array[0]);
+    //     printf("\nMax for rank %d, is %d \n",rank,sub_array[num-1]);
+    // }
+    // deuteros tropos gia eschange boundaries betwween paired groups
+    int boundary[] = { sub_array[0], sub_array[num-1]};
+    // for (int i= 0; i<size;i++){
+    //     printf(" hi %d \n",boundary[i]);
+    // }
+    min = sub_array[0];
+    max = sub_array[num-1];
 
-
-    if( min0 < min1 ){
-
-        int middle = num/size;
-        median = (sub_array[middle] + sub_array[middle+1])/2;
-        for(int c=0;c<num;c++){
-            if(sub_array[c]< median ){      // An stixio < median tote stilto ston allo processor
-
-                MPI_Send(&sub_array[c],1,MPI_INT,1,tag,MPI_COMM_WORLD);
-            }
-        }
     
+    if ( rank == 0 ){
+        MPI_Send(&boundary,1,MPI_INT,1,msgtag, MPI_COMM_WORLD);
+        MPI_Recv(&boundary,1,MPI_INT,1,msgtag,MPI_COMM_WORLD,&status);
+        printf("Hello this is boundary min from rank 1 : %d\n",boundary[0]);
+        printf("Hello this is boundary max from rank 1 : %d\n",boundary[1]);
+    }else if ( rank == 1) {
+        MPI_Send(&boundary,1,MPI_INT,0,msgtag, MPI_COMM_WORLD);
+        MPI_Recv(&boundary,1,MPI_INT,0,msgtag,MPI_COMM_WORLD,&status);
+        printf("Hello this is boundary min from rank 0 : %d\n",boundary[0]);
+        printf("Hello this is boundary max from rank 0 : %d\n",boundary[1]);
     }
-    
-    for ( int i = 0; i< num; i++){
+
+    // MPI_Bcast(&min,0,MPI_INT,1,MPI_COMM_WORLD);
+    // MPI_Bcast(&max,0,MPI_INT,1,MPI_COMM_WORLD);
+
+    if (num % 2 != 0){  // Elegxw an einai Artio i Peritto to plithos tou sub Array
+        median_first= (sub_array[middle] + sub_array[middle+1])/2;
+    }else{
+        median_first = sub_array[middle];
+    }
+
+    // if( min0 < min1 ){
+    //     /* AN to min tis listas tou rank 0 processor einai < tou min tou rank 1 
+    //     tote i lista sto rank 0 tha kratisei tis lower times dld tis times katw tou median 
+    //     kai meta paw stis times pou einai >= median 
+    //     kai tis times anw i ises tou median tha tis stilei stin lista tis rank 1
+    //     kai i rank 1 tha stilei tis times pou einai < = median stin lista tis rank 0
+    //     */
         
 
-    }
+    //     printf("\n Hello");
+    //     for(int c=0;c<num;c++){
+    //         if(sub_array[c] > median ){      // An stixio < median tote stilto ston allo processor
 
-    // Step 3 : Search for overlapped intervals and exchange data
-    first = 0;
-    last = n - 1;
-    // median = (sub_array[last]+sub_array[first])/2;
-    // int *p = &median;
-    //printf(" median %d\n",*p);
-    middle = (first+last)/2;
-
-
-    // while (first <= last) {
-    //     if (array[middle] < search)
-    //     first = middle + 1;    
-    //     else if (array[middle] == search) {
-    //         printf("%d found at location %d.\n", search, middle+1);
-    //         break;
+    //             MPI_Send(&sub_array[c],1,MPI_INT,1,tag,MPI_COMM_WORLD);
+    //         }
     //     }
-    //     else
-    //         last = middle - 1;
-
-    //     middle = (first + last)/2;
+    
+    // }else if( min0 > min1){
+    //     printf("\nDAMN");
     // }
+    
     return (0);
 }
 // compare function
