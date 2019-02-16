@@ -95,26 +95,68 @@ int main(int argc, const char *argv[])
         }     
     }
 
-
+    
     if ( rank == 0 ){
-        MPI_Send(&send_bound,1,MPI_INT,1,msgtag, MPI_COMM_WORLD);
-        MPI_Recv(&send_bound,1,MPI_INT,1,msgtag,MPI_COMM_WORLD,&status);
-
+        for(int i=0;i<2;i++){
+            printf("\n Prin exchange tou rank 0: %d \n",send_bound[i]);
+        } 
+        for(int i=0;i<2;i++){
+            MPI_Send(&send_bound[i],1,MPI_INT,1,msgtag, MPI_COMM_WORLD);
+            MPI_Recv(&send_bound[i],1,MPI_INT,1,msgtag,MPI_COMM_WORLD,&status);
+        }   
+        for(int i=0;i<2;i++){
+            printf("\n Meta exchange tou rank 0: %d \n",send_bound[i]);
+        }   
 
     }else if ( rank == 1) {
-        MPI_Send(&send_bound,1,MPI_INT,0,msgtag, MPI_COMM_WORLD);
-        MPI_Recv(&send_bound,1,MPI_INT,0,msgtag,MPI_COMM_WORLD,&status);
+        for(int i=0;i<2;i++){
+            printf("\n Prin exchange tou rank 1: %d \n",send_bound[i]);
+        }
+        for(int i=0;i<2;i++){
+            MPI_Send(&send_bound[i],1,MPI_INT,0,msgtag, MPI_COMM_WORLD);
+            MPI_Recv(&send_bound[i],1,MPI_INT,0,msgtag,MPI_COMM_WORLD,&status);
+        }      
+        for(int i=0;i<2;i++){
+            printf("\n Meta exchange tou rank 1: %d \n",send_bound[i]);
+        }       
+    }
+    // Vriskw intervals
+    int counter;
+    int *intervals = malloc(counter*sizeof(int));
+        for(int i=0;i<num;i++){
+            if( sub_array[i]>send_bound[0] && sub_array[i]<send_bound[1]){
+                intervals[counter] = sub_array[i];
+                counter++;
+            }
+        }
+
+
+    if( rank ==0){
+            printf("\ncounter tou 0 : %d",counter);
+
+        for(int i=0;i<counter;i++){
+            printf("\nIntervals tou rank 0 : %d",intervals[i]);
+        }
+    }else if (rank ==1 ){
+            printf("counter tou 1 : %d",counter);
+
+        for(int i=0;i<counter;i++){
+            printf("\nIntervals tou rank 1 : %d",intervals[i]);
+        }
     }
 
-    if( rank == 0){
-        for(int i=0;i<2;i++){
-            printf("\n exchange tou rank 0: %d \n",send_bound[i]);
-        }    
-    }else if( rank == 1){
-        for(int i=0;i<2;i++){
-            printf("\n exchange tou rank 1: %d \n",send_bound[i]);
-        }          
+    if( rank ==0 ){
+        if( counter % 2 == 0){ //perittos
+            median = intervals[counter/2+1];
+        }else{ // artios
+            int middle = round(counter/2);
+            median = intervals[middle];
+        }
+        printf("\no Median einai : %d\n",median);
     }
+    
+
+
 
     return (0);
 }
