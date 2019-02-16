@@ -153,7 +153,14 @@ int main(int argc, const char *argv[])
             median = intervals[middle];
         }
         printf("\no Median einai : %d\n",median);
+        MPI_Send(&median,1,MPI_INT,1,msgtag, MPI_COMM_WORLD);
+    }else{
+        MPI_Recv(&median,1,MPI_INT,0,msgtag,MPI_COMM_WORLD,&status);
+        printf("\neimai i Rank 1 kai pira to median %d\n",median);
     }
+
+
+    
     
 
 
