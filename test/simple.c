@@ -181,7 +181,7 @@ int main(int argc, const char *argv[])
             int middle = round(int_counter / 2);
             median = intervals[middle];
         }
-        printf("\no Median einai : %d\n", median);
+        printf("\no Median einai : %d kai ton vrika stin Rank 0 \n", median);
         MPI_Send(&median, 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD);
     }
     else
@@ -196,6 +196,7 @@ int main(int argc, const char *argv[])
     int *transfer_to1 = malloc(tr_counter_to1 * sizeof(int));
 
     if (rank == 0)
+    
     {
         for (int i = 0; i < int_counter; i++)
         {
@@ -205,15 +206,21 @@ int main(int argc, const char *argv[])
                 tr_counter_to1++;
             }
         }
+        MPI_Send(&tr_counter_to1, 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD);
+        MPI_Recv(&tr_counter_to0, 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD, &status);
         for (int i = 0; i < tr_counter_to1; i++)
         {
             MPI_Send(&transfer_to1[i], 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD);
         }
         for (int i = 0; i < tr_counter_to0; i++)
         {
-            MPI_Recv(&transfer_to0[i], 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&transfer_to0[i], 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD, &status);
         }
         printf("\nTransfer counter stin rank 1 : %d \n", tr_counter_to1);
+        for (int i = 0; i < tr_counter_to0; i++)
+        {
+            printf("Eimai Rank 0 kai exw parei ta Stoixeia %d apo tin Rank 1 \n", transfer_to0[i]);
+        }
     }
     else if (rank == 1)
     {
@@ -225,15 +232,23 @@ int main(int argc, const char *argv[])
                 tr_counter_to0++;
             }
         }
+        MPI_Send(&tr_counter_to0, 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD);
+        MPI_Recv(&tr_counter_to1, 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD, &status);
         for (int i = 0; i < tr_counter_to0; i++)
         {
             MPI_Send(&transfer_to0[i], 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD);
         }
         for (int i = 0; i < tr_counter_to1; i++)
         {
-            MPI_Recv(&transfer_to1[i], 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&transfer_to1[i], 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD, &status);
         }
         printf("\nTransfer counter stin rank 0 : %d \n", tr_counter_to0);
+        printf("\nPira apo tin rank 0 to : %d \n", transfer_to1[1]);
+
+        for (int i = 0; i < tr_counter_to1; i++)
+        {
+            printf("Eimai Rank 1 kai exw parei ta Stoixeia %d apo tin Rank 0 \n", transfer_to1[i]);
+        }
     }
 
     return (0);
