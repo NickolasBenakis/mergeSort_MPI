@@ -219,7 +219,7 @@ int main(int argc, const char *argv[])
         printf("\nTransfer counter stin rank 1 : %d \n", tr_counter_to1);
         for (int i = 0; i < tr_counter_to0; i++)
         {
-            printf("Eimai Rank 0 kai exw parei ta Stoixeia %d apo tin Rank 1 \n", transfer_to0[i]);
+            printf("Eimai Rank 0 kai exw parei ta Stoixeia : %d apo tin Rank 1 \n", transfer_to0[i]);
         }
     }
     else if (rank == 1)
@@ -247,9 +247,12 @@ int main(int argc, const char *argv[])
 
         for (int i = 0; i < tr_counter_to1; i++)
         {
-            printf("Eimai Rank 1 kai exw parei ta Stoixeia %d apo tin Rank 0 \n", transfer_to1[i]);
+            printf("Eimai Rank 1 kai exw parei ta Stoixeia : %d apo tin Rank 0 \n", transfer_to1[i]);
         }
     }
+
+
+    
 
     return (0);
 }
