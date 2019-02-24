@@ -66,7 +66,14 @@ int main(int argc, const char *argv[])
         for (int i = 0; i < n; i++)
         {
             //original_array[i] = rand() % (2 * n);
-            printf("%d, ", original_array[i]);
+            if (i == n - 1)
+            {
+                printf("%d", original_array[i]);
+            }
+            else
+            {
+                printf("%d, ", original_array[i]);
+            }
         }
         printf("\n");
     }
@@ -96,14 +103,14 @@ int main(int argc, const char *argv[])
     {
         for (int i = 0; i < 2; i++)
         {
-            printf("\n boundaries tou rank 0 : %d \n", my_bound[i]);
+            //  printf("\n boundaries tou rank 0 : %d \n", my_bound[i]);
         }
     }
     else if (rank == 1)
     {
         for (int i = 0; i < 2; i++)
         {
-            printf("\n boundaries tou rank 1 : %d \n", my_bound[i]);
+            //  printf("\n boundaries tou rank 1 : %d \n", my_bound[i]);
         }
     }
 
@@ -111,32 +118,30 @@ int main(int argc, const char *argv[])
     {
         for (int i = 0; i < 2; i++)
         {
-            printf("\n Prin exchange tou rank 0: %d \n", send_bound[i]);
+            //   printf("\n Prin exchange tou rank 0: %d \n", send_bound[i]);
         }
+
+        MPI_Send(&send_bound, 2, MPI_INT, 1, msgtag, MPI_COMM_WORLD);
+        MPI_Recv(&send_bound, 2, MPI_INT, 1, msgtag, MPI_COMM_WORLD, &status);
+
         for (int i = 0; i < 2; i++)
         {
-            MPI_Send(&send_bound[i], 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD);
-            MPI_Recv(&send_bound[i], 1, MPI_INT, 1, msgtag, MPI_COMM_WORLD, &status);
-        }
-        for (int i = 0; i < 2; i++)
-        {
-            printf("\n Meta exchange tou rank 0: %d \n", send_bound[i]);
+            //  printf("\n Meta exchange tou rank 0: %d \n", send_bound[i]);
         }
     }
     else if (rank == 1)
     {
         for (int i = 0; i < 2; i++)
         {
-            printf("\n Prin exchange tou rank 1: %d \n", send_bound[i]);
+            //  printf("\n Prin exchange tou rank 1: %d \n", send_bound[i]);
         }
+
+        MPI_Send(&send_bound, 2, MPI_INT, 0, msgtag, MPI_COMM_WORLD);
+        MPI_Recv(&send_bound, 2, MPI_INT, 0, msgtag, MPI_COMM_WORLD, &status);
+
         for (int i = 0; i < 2; i++)
         {
-            MPI_Send(&send_bound[i], 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD);
-            MPI_Recv(&send_bound[i], 1, MPI_INT, 0, msgtag, MPI_COMM_WORLD, &status);
-        }
-        for (int i = 0; i < 2; i++)
-        {
-            printf("\n Meta exchange tou rank 1: %d \n", send_bound[i]);
+            // printf("\n Meta exchange tou rank 1: %d \n", send_bound[i]);
         }
     }
     // Vriskw intervals
@@ -153,20 +158,20 @@ int main(int argc, const char *argv[])
 
     if (rank == 0)
     {
-        printf("\nInteval counter tou 0 : %d", int_counter);
+        printf("\noveralp counter tou 0 : %d", int_counter);
 
         for (int i = 0; i < int_counter; i++)
         {
-            printf("\nIntervals tou rank 0 : %d", intervals[i]);
+            printf("\noveralp tou rank 0 : %d", intervals[i]);
         }
     }
     else if (rank == 1)
     {
-        printf("Inteval counter tou 1 : %d", int_counter);
+        printf("\noveralp counter tou 1 : %d", int_counter);
 
         for (int i = 0; i < int_counter; i++)
         {
-            printf("\nIntervals tou rank 1 : %d", intervals[i]);
+            printf("\noveralp tou rank 1 : %d", intervals[i]);
         }
     }
 
@@ -196,7 +201,7 @@ int main(int argc, const char *argv[])
     int *transfer_to1 = malloc(tr_counter_to1 * sizeof(int));
 
     if (rank == 0)
-    
+
     {
         for (int i = 0; i < int_counter; i++)
         {
@@ -220,6 +225,31 @@ int main(int argc, const char *argv[])
         for (int i = 0; i < tr_counter_to0; i++)
         {
             printf("Eimai Rank 0 kai exw parei ta Stoixeia : %d apo tin Rank 1 \n", transfer_to0[i]);
+        }
+
+        // merge Overlaps with sub_array and make a new List in each processor
+        int num2=0;
+        int *final_subarray = malloc(num2 * sizeof(int));
+        for (int i = 0; i < num; i++)
+        {
+            if (sub_array[i] > median)
+            {
+                final_subarray[num2] = sub_array[i];
+                num2++;
+            }
+        }
+        int num3 = 0;
+        for (int i = 0; i < tr_counter_to0; i++)
+        {
+            final_subarray[num2+i] = transfer_to0[i];
+            num3++;
+        }
+        int sumNum = num2+num3;
+        qsort(final_subarray, sumNum, sizeof(int), cmpfunc);
+
+        for (int i = 0; i < sumNum; i++)
+        {
+            printf(" FINAL RANK 0 : %d \n", final_subarray[i]);
         }
     }
     else if (rank == 1)
@@ -249,10 +279,43 @@ int main(int argc, const char *argv[])
         {
             printf("Eimai Rank 1 kai exw parei ta Stoixeia : %d apo tin Rank 0 \n", transfer_to1[i]);
         }
+
+        // for (int i = 0; i < tr_counter_to1; i++)
+        // {
+        //     send_bound[2 + i] = transfer_to1[i];
+        // }
+
+        // for (int i = 0; i < 2 + tr_counter_to1; i++)
+        // {
+        //     printf(" FINAL RANK 1 : %d \n", send_bound[i]);
+        // }
+
+        //
+
+        int num2=0;
+        int *final_subarray = malloc(num2 * sizeof(int));
+        for (int i = 0; i < num; i++)
+        {
+            if (sub_array[i] < median)
+            {
+                final_subarray[num2] = sub_array[i];
+                num2++;
+            }
+        }
+        int num3 = 0;
+        for (int i = 0; i < tr_counter_to1; i++)
+        {
+            final_subarray[num2+i] = transfer_to1[i];
+            num3++;
+        }
+        int sumNum = num2+num3;
+        qsort(final_subarray, sumNum, sizeof(int), cmpfunc);
+
+        for (int i = 0; i < sumNum; i++)
+        {
+            printf(" FINAL RANK 1 : %d \n", final_subarray[i]);
+        }
     }
-
-
-    
 
     return (0);
 }
